@@ -12,9 +12,9 @@ The system follows a 3-Layer Architecture designed for security and ease of use.
 
 ```mermaid
 graph TD
-    User[User / QA Engineer] -->|Pastes Java Code| UI[React Frontend (Vite)]
-    UI -->|REST API POST| Proxy[Node.js Express Proxy]
-    Proxy -->|Sanitized Prompt| LLM[Ollama Local Engine]
+    User["User / QA Engineer"] -->|Pastes Java Code| UI["React Frontend (Vite)"]
+    UI -->|REST API POST| Proxy["Node.js Express Proxy"]
+    Proxy -->|Sanitized Prompt| LLM["Ollama Local Engine"]
     LLM -->|Generates TS| Proxy
     Proxy -->|Returns Code| UI
     UI -->|Displays Result| User
