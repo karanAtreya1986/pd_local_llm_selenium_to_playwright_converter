@@ -17,7 +17,7 @@ function App() {
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputCode, model: 'codellama' })
+        body: JSON.stringify({ inputCode, model: 'tinyllama' })
       });
 
       const data = await res.json();
@@ -149,7 +149,7 @@ function App() {
           <span className="text-xs text-gray-400 font-mono">System Status: Online</span>
         </div>
         <div className="text-xs text-gray-500 font-mono">
-          Model: llama3:latest / codellama
+          Model: tinyllama
         </div>
       </footer>
     </div>

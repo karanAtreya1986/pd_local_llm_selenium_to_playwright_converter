@@ -20,34 +20,51 @@ app.get('/health', async (req, res) => {
 
 app.post('/api/convert', async (req, res) => {
     const { inputCode, model } = req.body;
-    
+
     if (!inputCode) {
         return res.status(400).json({ error: "inputCode is required" });
     }
 
-    const targetModel = model || 'codellama';
+    const targetModel = model || 'tinyllama';
 
-    const systemPrompt = `You are an expert SDET. Convert the following Selenium Java code to Idiomatic Playwright TypeScript.
-    Rules:
-    - Return ONLY the TypeScript code.
-    - No markdown formatting (like \`\`\`).
-    - Use 'await page.locator(...)' instead of driver.findElement.
-    - Wrap in 'test' blocks.
+    const systemPrompt = `You are a coding assistant. Convert the Selenium Java code to Playwright TypeScript.
+
+    Example:
+    Input:
+    driver.findElement(By.id("user")).sendKeys("test");
+
+    Output:
+    await page.locator('#user').fill('test');
     `;
 
     try {
         const response = await axios.post(`${OLLAMA_URL}/api/generate`, {
             model: targetModel,
-            prompt: inputCode,
+            prompt: `Convert this Java Selenium code to Playwright TypeScript:\n\n${inputCode}\n\nTypeScript Code:`,
             system: systemPrompt,
             stream: false
         });
 
-        res.json({ 
-            result: response.data.response, 
-            meta: { 
+        let generatedText = response.data.response;
+
+        // Post-processing: Remove Markdown code blocks if present
+        const codeBlockRegex = /```(?:typescript|ts)?\s*([\s\S]*?)```/i;
+        const match = generatedText.match(codeBlockRegex);
+        if (match) {
+            generatedText = match[1];
+        }
+
+        // Post-processing: specific cleanups for common hallucinations
+        generatedText = generatedText
+            .replace(/^Here is the.*?code:?/im, '') // Remove "Here is the code"
+            .replace(/^TypeScript Code:?/im, '')    // Remove "TypeScript Code:" header
+            .trim();
+
+        res.json({
+            result: generatedText,
+            meta: {
                 duration: response.data.total_duration,
-                model: targetModel 
+                model: targetModel
             }
         });
 
